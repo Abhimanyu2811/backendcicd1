@@ -11,6 +11,34 @@ using Microsoft.ApplicationInsights.Extensibility;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add startup diagnostics
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+builder.Logging.AddAzureWebAppDiagnostics();
+
+// Log startup configuration
+var logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();
+logger.LogInformation("Starting application...");
+logger.LogInformation($"Environment: {builder.Environment.EnvironmentName}");
+logger.LogInformation($"Content Root: {builder.Environment.ContentRootPath}");
+logger.LogInformation($"Web Root: {builder.Environment.WebRootPath}");
+
+try
+{
+    // Log configuration values (excluding sensitive data)
+    logger.LogInformation("Configuration loaded:");
+    logger.LogInformation($"ASPNETCORE_ENVIRONMENT: {builder.Environment.EnvironmentName}");
+    logger.LogInformation($"Database Provider: {builder.Configuration.GetConnectionString("DefaultConnection")?.Split(';')[0]}");
+    logger.LogInformation($"JWT Issuer configured: {!string.IsNullOrEmpty(builder.Configuration["Jwt:Issuer"])}");
+    logger.LogInformation($"JWT Audience configured: {!string.IsNullOrEmpty(builder.Configuration["Jwt:Audience"])}");
+    logger.LogInformation($"Frontend URL: {builder.Configuration["ApiSettings:FrontendUrl"]}");
+}
+catch (Exception ex)
+{
+    logger.LogError(ex, "Error during startup configuration logging");
+}
+
 // Enable Application Insights
 builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, _) =>
@@ -188,15 +216,32 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     try
     {
+        logger.LogInformation("Starting database initialization...");
         var dbContext = services.GetRequiredService<AppDbContext>();
-        await dbContext.Database.EnsureCreatedAsync(); // Ensure database exists
+        
+        // Log database connection attempt
+        logger.LogInformation("Testing database connection...");
+        var canConnect = await dbContext.Database.CanConnectAsync();
+        logger.LogInformation($"Database connection test result: {canConnect}");
+        
+        if (!canConnect)
+        {
+            logger.LogError("Cannot connect to database. Please check connection string and network access.");
+            throw new Exception("Database connection failed");
+        }
+
+        // Ensure database exists
+        logger.LogInformation("Ensuring database exists...");
+        await dbContext.Database.EnsureCreatedAsync();
+        
+        // Seed data
+        logger.LogInformation("Starting data seeding...");
         await DataSeeder.SeedData(services);
-        app.Logger.LogInformation("Database seeding completed successfully.");
+        logger.LogInformation("Database initialization completed successfully.");
     }
     catch (Exception ex)
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the database.");
+        logger.LogError(ex, "An error occurred during database initialization");
         throw; // Rethrow to ensure the app doesn't start with a broken database
     }
 }
