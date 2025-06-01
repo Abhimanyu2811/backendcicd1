@@ -77,7 +77,7 @@ steps:
 - task: AzureWebApp@1
   displayName: 'Deploy to Azure Web App'
   inputs:
-    azureSubscription: 'Your-Azure-Subscription'  # Replace with your subscription name
+    azureSubscription: 'serviceconnectionname'  # Replace with your subscription name
     appName: '$(azureWebAppName)'
     package: '$(azureWebAppPackagePath)'
     appType: 'webApp'
