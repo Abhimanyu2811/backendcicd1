@@ -142,7 +142,8 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/error");
-    app.UseStatusCodePages(); // for 404 etc.
+    app.UseStatusCodePages();
+    app.UseHsts(); // Add HSTS in production
 }
 
 // Always redirect to HTTPS in production
@@ -181,20 +182,14 @@ app.MapControllers();
 app.MapGet("/", () => Results.Ok("EduSync API is running."));
 app.MapGet("/health", () => Results.Ok("Healthy"));
 
-// Set URLs in dev only
-if (app.Environment.IsDevelopment())
-{
-    app.Urls.Clear();
-    app.Urls.Add($"http://localhost:7197");
-    app.Urls.Add($"https://webappnamenewproject-byb2fqbqhha5efab.centralindia-01.azurewebsites.net");
-}
-
 // Seed data
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
+        var dbContext = services.GetRequiredService<AppDbContext>();
+        await dbContext.Database.EnsureCreatedAsync(); // Ensure database exists
         await DataSeeder.SeedData(services);
         app.Logger.LogInformation("Database seeding completed successfully.");
     }
@@ -202,6 +197,7 @@ using (var scope = app.Services.CreateScope())
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "An error occurred while seeding the database.");
+        throw; // Rethrow to ensure the app doesn't start with a broken database
     }
 }
 
