@@ -94,33 +94,7 @@ namespace Backendapi.Tests
             return dbSet;
         }
 
-        //[Test]
-        //public async Task GetCourses_ReturnsAllCourses()
-        //{
-        //    var result = await _controller.GetCourses();
-        //    Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
 
-        //    var okResult = (OkObjectResult)result.Result;
-        //    var courses = okResult.Value as IEnumerable<object>;
-        //    Assert.That(courses, Is.Not.Null);
-        //    Assert.That(courses.Count(), Is.EqualTo(_courses.Count));
-        //}
-
-        //[Test]
-        //public async Task GetCourse_ExistingId_ReturnsCourse()
-        //{
-        //    var courseId = _courses[0].CourseId;
-        //    var result = await _controller.GetCourse(courseId);
-        //    Assert.That(result.Value, Is.Not.Null);
-        //    Assert.That(result.Value.CourseId, Is.EqualTo(courseId));
-        //}
-
-        //[Test]
-        //public async Task GetCourse_NonExistingId_ReturnsNotFound()
-        //{
-        //    var result = await _controller.GetCourse(Guid.NewGuid());
-        //    Assert.That(result.Result, Is.InstanceOf<NotFoundResult>());
-        //}
 
         [Test]
         public async Task PostCourse_ValidDto_CreatesCourse()
@@ -158,25 +132,7 @@ namespace Backendapi.Tests
             Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
         }
 
-        //[Test]
-        //public async Task PutCourse_ValidUpdate_ReturnsNoContent()
-        //{
-        //    var existingCourse = _courses[0];
-        //    var dto = new CourseCreateDto
-        //    {
-        //        CourseId = existingCourse.CourseId,
-        //        Title = "Updated Title",
-        //        Description = existingCourse.Description,
-        //        InstructorId = existingCourse.InstructorId,
-        //        MediaUrl = existingCourse.MediaUrl,
-        //        CourseUrl = existingCourse.CourseUrl
-        //    };
 
-        //    _mockContext.Setup(c => c.SaveChangesAsync(default)).ReturnsAsync(1);
-
-        //    var result = await _controller.PutCourse(existingCourse.CourseId, dto);
-        //    Assert.That(result, Is.InstanceOf<NoContentResult>());
-        //}
 
         [Test]
         public async Task DeleteCourse_ExistingId_ReturnsNoContent()
@@ -200,62 +156,8 @@ namespace Backendapi.Tests
             Assert.That(result, Is.InstanceOf<NotFoundResult>());
         }
 
-        //[Test]
-        //public async Task GetInstructorCourses_ValidUser_ReturnsCourses()
-        //{
-        //    var instructorId = _courses[0].InstructorId;
 
-        //    // Setup ClaimsPrincipal for controller.User
-        //    var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-        //    {
-        //        new Claim(ClaimTypes.NameIdentifier, instructorId.ToString())
-        //    }, "mock"));
 
-        //    _controller.ControllerContext = new ControllerContext
-        //    {
-        //        HttpContext = new DefaultHttpContext { User = user }
-        //    };
 
-        //    var result = await _controller.GetInstructorCourses();
-        //    Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
-
-        //    var okResult = (OkObjectResult)result.Result;
-        //    var courses = okResult.Value as IEnumerable<object>;
-        //    Assert.That(courses, Is.Not.Null);
-        //    Assert.That(courses.Count(), Is.EqualTo(1)); // only one course matches instructor
-        //}
-
-        //[Test]
-        //public async Task GetEnrolledCourses_ValidUser_ReturnsEnrolledCourses()
-        //{
-        //    var user = _users[0];
-        //    var userId = user.UserId;
-
-        //    // Enroll user to one course
-        //    user.EnrolledCourses.Add(_courses[0]);
-
-        //    var mockUsersDbSet = GetQueryableMockDbSet(_users);
-        //    _mockContext.Setup(c => c.Users).Returns(mockUsersDbSet.Object);
-
-        //    var claimsUser = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-        //    {
-        //        new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        //    }, "mock"));
-
-        //    _controller.ControllerContext = new ControllerContext
-        //    {
-        //        HttpContext = new DefaultHttpContext { User = claimsUser }
-        //    };
-
-        //    var result = await _controller.GetEnrolledCourses();
-        //    Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
-
-        //    var okResult = (OkObjectResult)result.Result;
-        //    var enrolled = okResult.Value as IEnumerable<object>;
-        //    Assert.That(enrolled, Is.Not.Null);
-        //    Assert.That(enrolled.Count(), Is.EqualTo(1));
-        //}
-
-        
     }
 }
