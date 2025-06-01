@@ -1,0 +1,86 @@
+name: Build and deploy ASP.NET Core app to Azure Web App
+
+env:
+  AZURE_WEBAPP_NAME: webappnamenewproject    # set this to your application's name
+  AZURE_WEBAPP_PACKAGE_PATH: '$(System.DefaultWorkingDirectory)/backendcicd1' # set this to the path to your web app project, defaults to the repository root
+  DOTNET_VERSION: '8.0.x'                   # set this to the .NET version to use
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Set up dependency caching for faster builds
+      uses: actions/cache@v3
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Build with dotnet
+      run: dotnet build "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}" --configuration Release
+
+    - name: dotnet publish
+      run: dotnet publish "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}" --configuration Release --output ${{ env.DOTNET_PUBLISH }}
+
+    - name: Upload artifact for deployment jobs
+      uses: actions/upload-artifact@v3
+      with:
+        name: .net-app
+        path: ${{ env.DOTNET_PUBLISH }}
+
+  deploy:
+    permissions:
+      contents: none
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+    - name: Download artifact from build job
+      uses: actions/download-artifact@v3
+      with:
+        name: .net-app
+
+    - name: Unzip artifact for deployment
+      run: unzip .net-app.zip
+
+    - name: 'Deploy to Azure Web App'
+      id: deploy-to-webapp
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: .
+
+    - name: 'Set environment variables'
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        app-settings: |
+          Jwt__Issuer=https://webappnamenewproject-byb2fqbqhha5efab.centralindia-01.azurewebsites.net
+          Jwt__Audience=https://proud-plant-0cd1a3400.6.azurestaticapps.net
+          ApiSettings__FrontendUrl=https://proud-plant-0cd1a3400.6.azurestaticapps.net
+          ASPNETCORE_ENVIRONMENT=Production
+          ConnectionStrings__DefaultConnection=${{ secrets.CONNECTION_STRING }}
+          Jwt__Key=${{ secrets.JWT_KEY }}
+          APPLICATIONINSIGHTS_CONNECTION_STRING=${{ secrets.APPLICATIONINSIGHTS_CONNECTION_STRING }} 

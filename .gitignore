@@ -59,8 +59,7 @@ artifacts/
 *.code-workspace
 
 # dotenv environment variables
-.env
-.env.*
+
 
 # Resharper
 _ReSharper*/

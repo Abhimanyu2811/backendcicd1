@@ -108,8 +108,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy.WithOrigins(
-            frontendUrl,
-            "https://lively-coast-028e05600.6.azurestaticapps.net",
+            "https://proud-plant-0cd1a3400.6.azurestaticapps.net",
             "http://localhost:3000"  // Keep local development URL
         )
         .AllowAnyMethod()
@@ -187,6 +186,7 @@ if (app.Environment.IsDevelopment())
 {
     app.Urls.Clear();
     app.Urls.Add($"http://localhost:7197");
+    app.Urls.Add($"https://webappnamenewproject-byb2fqbqhha5efab.centralindia-01.azurewebsites.net");
 }
 
 // Seed data
