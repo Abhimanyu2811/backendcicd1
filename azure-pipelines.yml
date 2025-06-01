@@ -82,14 +82,7 @@ steps:
     package: '$(azureWebAppPackagePath)'
     appType: 'webApp'
     deploymentMethod: 'auto'
-    appSettings: |
-      -Jwt__Issuer $(Jwt__Issuer)
-      -Jwt__Audience $(Jwt__Audience)
-      -ApiSettings__FrontendUrl $(ApiSettings__FrontendUrl)
-      -ASPNETCORE_ENVIRONMENT $(ASPNETCORE_ENVIRONMENT)
-      -ConnectionStrings__DefaultConnection $(ConnectionStrings.DefaultConnection)
-      -Jwt__Key $(Jwt.Key)
-      -ApplicationInsights__ConnectionString $(ApplicationInsights.ConnectionString)
+    
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish build artifacts'
